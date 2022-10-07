@@ -1,3 +1,5 @@
+// go test -coverprofile=coverage.out to create a coverage.out file
+// go tool cover -html=coverage.out to render it to the browser as html
 package main
 
 import "testing"

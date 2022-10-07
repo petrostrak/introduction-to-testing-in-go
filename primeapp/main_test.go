@@ -11,6 +11,9 @@ func Test_isPrime(t *testing.T) {
 		expected bool
 		msg      string
 	}{
+		{"zero", 0, false, "0 is not prime, by definition!\n"},
+		{"one", 1, false, "1 is not prime, by definition!\n"},
+		{"negative number", -1, false, "Negative numbers are not prime, by definition!"},
 		{"prime", 7, true, "7 is a prime!\n"},
 		{"not prime", 8, false, "8 is not prime because it is divisible by 2\n"},
 	}

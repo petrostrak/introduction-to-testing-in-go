@@ -2,7 +2,11 @@
 // go tool cover -html=coverage.out to render it to the browser as html
 package main
 
-import "testing"
+import (
+	"io"
+	"os"
+	"testing"
+)
 
 func Test_isPrime(t *testing.T) {
 	primeTests := []struct {
@@ -32,5 +36,32 @@ func Test_isPrime(t *testing.T) {
 		if e.msg != msg {
 			t.Errorf("%s: expected %s but got %s", e.name, e.msg, msg)
 		}
+	}
+}
+
+func Test_prompt(t *testing.T) {
+	// save a copy of os.Stdout
+	oldOut := os.Stdout
+
+	// create a read and write pipe
+	r, w, _ := os.Pipe()
+
+	// st os.Stdout to our write pipe
+	os.Stdout = w
+
+	prompt()
+
+	// close writer
+	_ = w.Close()
+
+	// reset os.Stdout to what it was before
+	os.Stdout = oldOut
+
+	// read the output of the prompt() from read pipe
+	out, _ := io.ReadAll(r)
+
+	// perform test
+	if string(out) != "-> " {
+		t.Errorf("incorrect prompt: expeted -> but got %s", string(out))
 	}
 }

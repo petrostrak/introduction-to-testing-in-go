@@ -39,7 +39,7 @@ func readUserInput(done chan bool) {
 		}
 
 		fmt.Println(res)
-		promt()
+		prompt()
 	}
 }
 
@@ -67,10 +67,10 @@ func intro() {
 	fmt.Println("Is it Prime?")
 	fmt.Println("------------")
 	fmt.Println("Enter a whole number, and we'll tell you if it is a prime number or not. Enter q to quit.")
-	promt()
+	prompt()
 }
 
-func promt() {
+func prompt() {
 	fmt.Print("-> ")
 }
 

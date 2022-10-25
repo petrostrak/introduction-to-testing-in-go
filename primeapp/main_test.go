@@ -3,8 +3,10 @@
 package main
 
 import (
+	"bufio"
 	"io"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -90,6 +92,35 @@ func Test_Intro(t *testing.T) {
 	// perform test {
 	if string(out) != "Is it Prime?\n------------\nEnter a whole number, and we'll tell you if it is a prime number or not. Enter q to quit.\n-> " {
 		t.Errorf("incorrect prompt: expected Is it Prime?\n ------------\n Enter a whole number, and we'll tell you if it is a prime number or not. Enter q to quit.\n-> but got %s", string(out))
+	}
+
+}
+
+func Test_checkNumbers(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{name: "empty", input: "", expected: "Please enter a whole number!"},
+		{name: "prime", input: "7", expected: "7 is a prime!\n"},
+		{name: "negative", input: "-1", expected: "Negative numbers are not prime, by definition!"},
+		{name: "zero", input: "0", expected: "0 is not prime, by definition!\n"},
+		{name: "non-prime", input: "9", expected: "9 is not prime because it is divisible by 3\n"},
+		{name: "quit", input: "q", expected: ""},
+	}
+
+	for _, e := range tests {
+		// emulate user input with strings.NewReader
+		input := strings.NewReader(e.input)
+
+		reader := bufio.NewScanner(input)
+
+		res, _ := checkNumbers(reader)
+
+		if !strings.EqualFold(res, e.expected) {
+			t.Errorf("%s: expected %s, but got %s", e.name, e.expected, res)
+		}
 	}
 
 }

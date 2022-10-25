@@ -62,6 +62,34 @@ func Test_prompt(t *testing.T) {
 
 	// perform test
 	if string(out) != "-> " {
-		t.Errorf("incorrect prompt: expeted -> but got %s", string(out))
+		t.Errorf("incorrect prompt: expected -> but got %s", string(out))
 	}
+}
+
+func Test_Intro(t *testing.T) {
+	// save a copy of os.Stdout
+	oldOut := os.Stdout
+
+	// create a read and write pipe
+	r, w, _ := os.Pipe()
+
+	// set os.Stdout to write pipe
+	os.Stdout = w
+
+	intro()
+
+	// close writer
+	_ = w.Close()
+
+	// reset os.Stdout to what it was before
+	os.Stdout = oldOut
+
+	// read the output of the intro() from read pipe
+	out, _ := io.ReadAll(r)
+
+	// perform test {
+	if string(out) != "Is it Prime?\n------------\nEnter a whole number, and we'll tell you if it is a prime number or not. Enter q to quit.\n-> " {
+		t.Errorf("incorrect prompt: expected Is it Prime?\n ------------\n Enter a whole number, and we'll tell you if it is a prime number or not. Enter q to quit.\n-> but got %s", string(out))
+	}
+
 }

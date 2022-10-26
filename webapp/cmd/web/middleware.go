@@ -11,7 +11,7 @@ type contextKey string
 
 const contextUserKey contextKey = "user_ip"
 
-func (app *application) inFromContext(ctx context.Context) string {
+func (app *application) ipFromContext(ctx context.Context) string {
 	return ctx.Value(contextUserKey).(string)
 }
 

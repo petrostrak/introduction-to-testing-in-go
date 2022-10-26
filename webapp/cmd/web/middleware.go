@@ -28,7 +28,7 @@ func getIp(r *http.Request) (string, error) {
 	}
 
 	// is it comming from a proxy?
-	forward := r.Header.Get("X-Forwareded-For")
+	forward := r.Header.Get("X-Forwarded-For")
 	if len(forward) > 0 {
 		ip = forward
 	}

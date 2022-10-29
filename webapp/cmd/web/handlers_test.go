@@ -25,8 +25,6 @@ func Test_application_handlers(t *testing.T) {
 	ts := httptest.NewTLSServer(routes)
 	defer ts.Close()
 
-	pathToTemlpates = "./../../templates/"
-
 	// range through test data
 	for _, e := range tests {
 		resp, err := ts.Client().Get(ts.URL + e.url)
@@ -38,30 +36,6 @@ func Test_application_handlers(t *testing.T) {
 		if resp.StatusCode != e.expectedStatusCode {
 			t.Errorf("for %s: expected status %d, but got %d", e.name, e.expectedStatusCode, resp.StatusCode)
 		}
-	}
-}
-
-func TestApp_Home_Old(t *testing.T) {
-	// create a request
-	req, _ := http.NewRequest("GET", "/", nil)
-
-	// add context
-	req = addContextAndSessionToRequest(req, app)
-
-	// create a response
-	rr := httptest.NewRecorder()
-
-	handler := http.HandlerFunc(app.Home)
-	handler.ServeHTTP(rr, req)
-
-	// check status code
-	if rr.Code != http.StatusOK {
-		t.Errorf("TestApp_Home returned wrong status code; expected 200 but got %d", rr.Code)
-	}
-
-	body, _ := io.ReadAll(rr.Body)
-	if !strings.Contains(string(body), `<small>From Session:`) {
-		t.Error("did not find correct text in html")
 	}
 }
 
@@ -115,4 +89,19 @@ func addContextAndSessionToRequest(req *http.Request, app application) *http.Req
 	ctx, _ := app.Session.Load(req.Context(), req.Header.Get("X-Session"))
 
 	return req.WithContext(ctx)
+}
+
+func TestApp_renderWithBadTemplate(t *testing.T) {
+	// set templatePath to a location with a bad template
+	pathToTemlpates = "./testdata/"
+
+	req, _ := http.NewRequest("GET", "/", nil)
+	req = addContextAndSessionToRequest(req, app)
+	rr := httptest.NewRecorder()
+
+	err := app.render(rr, req, "bad.page.gohtml", &TemplateData{})
+
+	if err == nil {
+		t.Error("expected error from bad template, but did not get one.")
+	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -63,7 +62,9 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 	form.Required("email", "password")
 
 	if !form.Valid() {
-		fmt.Fprint(w, "failed validation")
+		// redirect to the login page with error message
+		app.Session.Put(r.Context(), "error", "Invalid login credentials")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -72,12 +73,26 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 
 	user, err := app.DB.GetUserByEmail(email)
 	if err != nil {
-		log.Println(email)
+		app.Session.Put(r.Context(), "error", "Invalid login!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
 
-	log.Println("From DB:", user.FirstName)
+	log.Println(password, user.FirstName)
 
-	log.Println(email, password)
+	// authenticate the user
+	// if not authenticated then redirect with error
 
-	fmt.Fprint(w, email)
+	//prevent fixation attack
+	_ = app.Session.RenewToken(r.Context())
+
+	// store success message in session
+
+	// redirect to some other page
+	app.Session.Put(r.Context(), "flash", "Successfully logged in!")
+	http.Redirect(w, r, "/user/profile", http.StatusSeeOther)
+}
+
+func (app *application) Profile(w http.ResponseWriter, r *http.Request) {
+	_ = app.render(w, r, "profile.page.gohtml", &TemplateData{})
 }

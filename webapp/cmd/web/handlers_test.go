@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -106,4 +107,75 @@ func TestApp_renderWithBadTemplate(t *testing.T) {
 	}
 
 	pathToTemlpates = "./../../templates/"
+}
+
+func Test_App_Login(t *testing.T) {
+	var tests = []struct {
+		name               string
+		postedData         url.Values
+		expectedStatusCode int
+		expectedLocation   string
+	}{
+		{
+			name: "valid login",
+			postedData: url.Values{
+				"email":    {"admin@example.com"},
+				"password": {"secret"},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLocation:   "/user/profile",
+		},
+		{
+			name: "missing form data",
+			postedData: url.Values{
+				"email":    {""},
+				"password": {""},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLocation:   "/",
+		},
+		{
+			name: "user not found",
+			postedData: url.Values{
+				"email":    {"you@there.com"},
+				"password": {"password"},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLocation:   "/",
+		},
+		{
+			name: "bad credentials",
+			postedData: url.Values{
+				"email":    {"admin@example.com"},
+				"password": {"secret2"},
+			},
+			expectedStatusCode: http.StatusSeeOther,
+			expectedLocation:   "/",
+		},
+	}
+
+	for _, e := range tests {
+		req, _ := http.NewRequest("POST", "/login", strings.NewReader(e.postedData.Encode()))
+		req = addContextAndSessionToRequest(req, app)
+
+		// This is the content type that golang expects to find from an html form-post
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(app.Login)
+		handler.ServeHTTP(rr, req)
+
+		if rr.Code != e.expectedStatusCode {
+			t.Errorf("%s: returned wrong status code; expected %d, but got %d", e.name, e.expectedStatusCode, rr.Code)
+		}
+
+		actualLocation, err := rr.Result().Location()
+		if err == nil {
+			if actualLocation.String() != e.expectedLocation {
+				t.Errorf("%s: expected location %s but got %s", e.name, e.expectedLocation, actualLocation.String())
+			}
+		} else {
+			t.Errorf("%s: no location header set", e.name)
+		}
+
+	}
 }

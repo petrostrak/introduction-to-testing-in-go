@@ -9,12 +9,13 @@ import (
 )
 
 func Test_application_routes(t *testing.T) {
-	var registed = []struct {
+	var registered = []struct {
 		route  string
 		method string
 	}{
 		{"/", "GET"},
 		{"/login", "POST"},
+		{"/user/profile", "GET"},
 		{"/static/*", "GET"},
 	}
 
@@ -22,7 +23,7 @@ func Test_application_routes(t *testing.T) {
 
 	chiRoutes := mux.(chi.Routes)
 
-	for _, route := range registed {
+	for _, route := range registered {
 		// check to see if the route exists
 		if !routeExists(route.route, route.method, chiRoutes) {
 			t.Errorf("route %s is not registered", route.route)

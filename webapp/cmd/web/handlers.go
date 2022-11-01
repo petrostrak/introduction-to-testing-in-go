@@ -86,15 +86,16 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(password, user.FirstName)
-
 	// authenticate the user
 	// if not authenticated then redirect with error
+	if !app.authenticate(r, user, password) {
+		app.Session.Put(r.Context(), "error", "Invalid login!")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
 
 	//prevent fixation attack
 	_ = app.Session.RenewToken(r.Context())
-
-	// store success message in session
 
 	// redirect to some other page
 	app.Session.Put(r.Context(), "flash", "Successfully logged in!")
@@ -103,4 +104,18 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) Profile(w http.ResponseWriter, r *http.Request) {
 	_ = app.render(w, r, "profile.page.gohtml", &TemplateData{})
+}
+
+func (app *application) authenticate(r *http.Request, user *data.User, password string) bool {
+	if valid, err := user.PasswordMatches(password); err != nil || !valid {
+		return false
+	}
+
+	// In order to put non-primitive types into session,
+	// we need to register our custom struct with the
+	// session/ application with the use of the method
+	// gob.Register(data.User{})
+	app.Session.Put(r.Context(), "user", user)
+
+	return true
 }

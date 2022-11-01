@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/gob"
 	"flag"
 	"log"
 	"net/http"
+	"simple-web-app/pkg/data"
 	"simple-web-app/pkg/db"
 
 	"github.com/alexedwards/scs/v2"
@@ -16,6 +18,9 @@ type application struct {
 }
 
 func main() {
+	// register data.User{} with the session
+	gob.Register(data.User{})
+
 	// set up an app config
 	app := application{
 		Session: getSession(),

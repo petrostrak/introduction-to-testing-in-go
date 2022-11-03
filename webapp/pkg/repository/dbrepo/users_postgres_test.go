@@ -181,6 +181,11 @@ func TestPostgresDBRepoGetUser(t *testing.T) {
 	if user.Email != "admin@example.com" {
 		t.Errorf("wrong email returned; expected 'admin@example.com' but got %s", user.Email)
 	}
+
+	_, err = testRepo.GetUser(3)
+	if err == nil {
+		t.Error("no error reported when getting non existen user by id")
+	}
 }
 
 func TestPostgresDBRepoGetUserByEmail(t *testing.T) {

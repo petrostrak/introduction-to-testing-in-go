@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"simple-web-app/repository/dbrepo"
+	"simple-web-app/pkg/repository/dbrepo"
 	"testing"
 )
 

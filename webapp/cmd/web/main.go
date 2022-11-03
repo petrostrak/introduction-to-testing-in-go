@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"simple-web-app/pkg/data"
-	"simple-web-app/repository"
-	"simple-web-app/repository/dbrepo"
+	"simple-web-app/pkg/repository"
+	"simple-web-app/pkg/repository/dbrepo"
 
 	"github.com/alexedwards/scs/v2"
 )

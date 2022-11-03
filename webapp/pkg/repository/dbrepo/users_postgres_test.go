@@ -139,3 +139,35 @@ func TestPostgresDBRepoInstertUser(t *testing.T) {
 		t.Errorf("insert user returned wrong id; expected 1, but got %d", id)
 	}
 }
+
+func TestPostgresDBRepoAllUsers(t *testing.T) {
+	users, err := testRepo.AllUsers()
+	if err != nil {
+		t.Errorf("all users reports an error: %s", err)
+	}
+
+	if len(users) != 1 {
+		t.Errorf("all users reports wrong size; expected 1 but got %d", len(users))
+	}
+
+	testUser := data.User{
+		FirstName: "admin",
+		LastName:  "user",
+		Email:     "admin@example.com",
+		Password:  "secret",
+		IsAdmin:   1,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	testRepo.InsertUser(testUser)
+
+	users, err = testRepo.AllUsers()
+	if err != nil {
+		t.Errorf("all users reports an error: %s", err)
+	}
+
+	if len(users) != 2 {
+		t.Errorf("all users reports wrong size after second insert; expected 2 but got %d", len(users))
+	}
+}

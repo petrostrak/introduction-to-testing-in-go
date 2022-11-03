@@ -77,10 +77,27 @@ func TestMain(m *testing.M) {
 	}
 
 	// populate the DB with empty tables
+	if err = createTables(); err != nil {
+		log.Println("error creating tables: %s", err)
+	}
 
 	// run tests
 	code := m.Run()
 
 	// clean up
 	os.Exit(code)
+}
+
+func createTables() error {
+	tableSQL, err := os.ReadFile("./testdata/users.sql")
+	if err != nil {
+		log.Println("cannot read sql file")
+		return err
+	}
+
+	_, err = testDB.Exec(string(tableSQL))
+	if err != nil {
+		log.Println("could not exec sql file")
+		return err
+	}
 }

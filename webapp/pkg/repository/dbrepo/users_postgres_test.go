@@ -182,3 +182,14 @@ func TestPostgresDBRepoGetUser(t *testing.T) {
 		t.Errorf("wrong email returned; expected 'admin@example.com' but got %s", user.Email)
 	}
 }
+
+func TestPostgresDBRepoGetUserByEmail(t *testing.T) {
+	user, err := testRepo.GetUserByEmail("jack@smith.com")
+	if err != nil {
+		t.Errorf("error getting user by email: %s", err)
+	}
+
+	if user.ID != 2 {
+		t.Errorf("wrong id returned; expected 2 but got %d", user.ID)
+	}
+}

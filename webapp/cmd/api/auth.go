@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"simple-web-app/pkg/data"
 	"strings"
 	"time"
 
@@ -81,4 +82,50 @@ func (app *application) getTokenFromHeaderAndVerify(w http.ResponseWriter, r *ht
 
 	// valid token
 	return token, claims, nil
+}
+
+func (app *application) generateTokenPair(user *data.User) (TokenPairs, error) {
+	// create the token
+	token := jwt.New(jwt.SigningMethodHS256)
+
+	// set claims
+	claims := token.Claims.(jwt.MapClaims)
+	claims["name"] = fmt.Sprintf("%s %s", user.FirstName, user.LastName)
+	claims["sub"] = fmt.Sprint(user.ID)
+	claims["aud"] = app.Domain
+	claims["iss"] = app.Domain
+	if user.IsAdmin == 1 {
+		claims["admin"] = true
+	} else {
+		claims["admin"] = false
+	}
+
+	// set the expiry
+	claims["exp"] = time.Now().Add(jwtTokenExpiry).Unix()
+
+	// create the signed token
+	signedAccessToken, err := token.SignedString([]byte(app.JWTSecret))
+	if err != nil {
+		return TokenPairs{}, err
+	}
+
+	// create the refresh token
+	refreshToken := jwt.New(jwt.SigningMethodHS256)
+	refreshTokenClaims := refreshToken.Claims.(jwt.MapClaims)
+	refreshTokenClaims["sub"] = fmt.Sprint(user.ID)
+	// set expiry; must be longer than jwt expire
+	refreshTokenClaims["exp"] = time.Now().Add(refreshTokenExpiry).Unix()
+
+	// create signed refresh token
+	signedRefreshToken, err := refreshToken.SignedString([]byte(app.JWTSecret))
+	if err != nil {
+		return TokenPairs{}, err
+	}
+
+	var tokenPairs = TokenPairs{
+		Token:        signedAccessToken,
+		RefreshToken: signedRefreshToken,
+	}
+
+	return tokenPairs, nil
 }

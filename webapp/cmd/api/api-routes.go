@@ -14,6 +14,9 @@ func (app *application) routes() http.Handler {
 	mux.Use(middleware.Recoverer)
 	mux.Use(app.enableCORS)
 
+	// serve static html
+	mux.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./html/"))))
+
 	// authentication routes - auth handler, refresh
 	mux.Post("/auth", app.authenticate)
 	mux.Post("/refresh-token", app.refresh)

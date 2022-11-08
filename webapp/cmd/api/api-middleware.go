@@ -16,3 +16,17 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 		}
 	})
 }
+
+// checks for valid authorization header (Bearer <token>) and determines if someone is
+// allowed to access a particular resource.
+func (app *application) authRequired(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _, err := app.getTokenFromHeaderAndVerify(w, r)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
